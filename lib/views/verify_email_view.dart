@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:rpg_life_app/constants/routes.dart';
 
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
@@ -38,7 +39,7 @@ class _VerifyEmailViewState extends State<VerifyEmailView> with WidgetsBindingOb
 
     if (user?.emailVerified ?? false) {
       // Navigate to home or success screen
-      Navigator.of(context).pushNamedAndRemoveUntil("/home", (route) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil(homeRoute, (route) => false);
     } else {
       // Still not verified, stay on the page or show a message
       setState(() {}); // update UI

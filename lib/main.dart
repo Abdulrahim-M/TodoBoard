@@ -12,6 +12,8 @@ import 'package:rpg_life_app/views/mainapp_view.dart';
 import 'package:rpg_life_app/views/register_view.dart';
 import 'package:rpg_life_app/views/verify_email_view.dart';
 
+import 'constants/routes.dart';
+
 const bool USE_EMULATOR = true;
 
 Future<FirebaseApp> _initializeFirebase() async {
@@ -49,13 +51,10 @@ void main(){
       ),
       home: const HomePage(),
       routes: {
-        '/login': (context) => LoginView(),
-        '/register': (context) => RegisterView(),
-        '/home': (context) => HomePage(),
-        '/verify-email': (context) => const VerifyEmailView(),
-        // '/forgot-password': (context) => const ForgotPasswordView(),
-        // '/reset-password': (context) => const ResetPasswordView(),
-        // '/Welcome': (context) => const WelcomeView(),
+        loginRoute: (context) => const LoginView(),
+        registerRoute: (context) => const RegisterView(),
+        homeRoute: (context) => const HomePage(),
+        verifyEmailRoute: (context) => const VerifyEmailView(),
       },
     )
   );

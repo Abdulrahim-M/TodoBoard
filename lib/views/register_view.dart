@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:rpg_life_app/main.dart';
 
+import '../constants/routes.dart';
+
 Future<FirebaseApp> _initializeFirebase() async {
   FirebaseApp firebaseApp = await Firebase.initializeApp();
 
@@ -150,10 +152,10 @@ class _RegisterViewState extends State<RegisterView> {
                                 setState(() {});
                               }
                               else if (!user.emailVerified) {
-                                Navigator.of(context).pushNamedAndRemoveUntil("/verify-email", (route) => false);
+                                Navigator.of(context).pushNamedAndRemoveUntil(verifyEmailRoute, (route) => false);
                               }
                               else {
-                                Navigator.of(context).pushNamedAndRemoveUntil("/home", (route) => false);
+                                Navigator.of(context).pushNamedAndRemoveUntil(homeRoute, (route) => false);
                               }
                             }
                           },
@@ -165,7 +167,7 @@ class _RegisterViewState extends State<RegisterView> {
                             Text("Already have an account?", style: TextStyle(fontSize: 12)),
                             TextButton(
                               onPressed: () {
-                                Navigator.of(context).pushNamedAndRemoveUntil("/login", (route) => false);
+                                Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (route) => false);
                               },
                               child: Text("Login here", style: TextStyle(fontSize: 15)),
                             ),

@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:rpg_life_app/constants/routes.dart';
 import 'package:rpg_life_app/main.dart';
 import 'package:rpg_life_app/views/register_view.dart';
 import 'package:rpg_life_app/views/verify_email_view.dart';
@@ -103,7 +104,7 @@ class _LoginViewState extends State<LoginView> {
                             final userCredential = await FirebaseAuth.instance
                                 .signInWithEmailAndPassword(
                                 email: email,
-                                password: password
+                                password: password,
                             );
                           } on FirebaseAuthException catch (e) {
                             // TODO: Manage error codes and user hints
@@ -127,14 +128,13 @@ class _LoginViewState extends State<LoginView> {
                             WidgetsBinding.instance.addPostFrameCallback((_) {
                               Navigator.of(context).push(
                                 MaterialPageRoute(
-                                  builder: (
-                                      context) => const VerifyEmailView(),
+                                  builder: (context) => const VerifyEmailView(),
                                 ),
                               );
                             });
                           } else {
                             WidgetsBinding.instance.addPostFrameCallback((_) {
-                              Navigator.of(context).pushNamedAndRemoveUntil("/home", (route) => false);
+                              Navigator.of(context).pushNamedAndRemoveUntil(homeRoute, (route) => false);
                             });
                           }
                         },
@@ -149,7 +149,7 @@ class _LoginViewState extends State<LoginView> {
                           TextButton(
                             onPressed: () {
                               WidgetsBinding.instance.addPostFrameCallback((_) {
-                                Navigator.of(context).pushNamedAndRemoveUntil('/register', (route) => false);
+                                Navigator.of(context).pushNamedAndRemoveUntil(registerRoute, (route) => false);
                               });
                             },
                             child: Text(
