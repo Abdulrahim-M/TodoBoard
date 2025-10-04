@@ -1,0 +1,35 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "rpg-life-project-87497",
+          "appId": "1:672526374321:android:3195a2ba7c426c0fae1990",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "rpg-life-project-87497",
+          "configurations": {
+            "android": "1:672526374321:android:3195a2ba7c426c0fae1990",
+            "web": "1:672526374321:web:8ec9698c1f6992c6ae1990",
+            "windows": "1:672526374321:web:1a07083e8ef11709ae1990"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true,
+    "firestore": {
+      "port": 8080
+    }
+  }
+}

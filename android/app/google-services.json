@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "672526374321",
+    "project_id": "rpg-life-project-87497",
+    "storage_bucket": "rpg-life-project-87497.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:672526374321:android:3195a2ba7c426c0fae1990",
+        "android_client_info": {
+          "package_name": "com.example.rpg_life_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlLIut45nnJHZ0_8RwJqzdm7Iu-4as2c8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
