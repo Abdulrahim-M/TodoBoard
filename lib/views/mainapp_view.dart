@@ -1,8 +1,8 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:developer'as dev;
 
 import '../constants/routes.dart';
+import '../services/auth/auth_service.dart';
 
 enum MenuAction {
   Account,
@@ -54,7 +54,7 @@ class _MainAppViewState extends State<MainAppView> with WidgetsBindingObserver {
                     dev.log("Sign out");
                     switch (await showLogOutDialog(context)) {
                       case true:
-                        await FirebaseAuth.instance.signOut();
+                        AuthService.firebase().logout();
                         Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (route) => false);
                       case false:
                         dev.log("Sign out cancelled");

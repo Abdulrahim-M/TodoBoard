@@ -1,44 +1,18 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:rpg_life_app/views/loading_view.dart';
 import 'package:rpg_life_app/views/login_view.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:rpg_life_app/views/mainapp_view.dart';
 import 'package:rpg_life_app/views/register_view.dart';
 import 'package:rpg_life_app/views/verify_email_view.dart';
+import 'package:rpg_life_app/services/auth/auth_service.dart';
 
 import 'constants/routes.dart';
 
 const bool USE_EMULATOR = true;
 
-Future<FirebaseApp> _initializeFirebase() async {
-  FirebaseApp firebaseApp = await Firebase.initializeApp();
-
-  // Set up the emulator for Firebase
-  if(USE_EMULATOR) {
-    final localHostString = Platform.isAndroid ? '10.0.2.2' : 'localhost';
-
-    FirebaseFirestore.instance.settings = Settings(
-      host: '$localHostString:8080',
-      sslEnabled: false,
-      persistenceEnabled: false,
-    );
-
-    await FirebaseAuth.instance.useAuthEmulator(localHostString, 9099);
-  }
-
-  await FirebaseAuth.instance.currentUser?.reload();
-
-  return firebaseApp;
-}
 
 void main(){
-  WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MaterialApp(
       title: 'Flutter Demo',
@@ -67,13 +41,12 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-        future: _initializeFirebase(),
+        future: AuthService.firebase().initialize(USE_EMULATOR),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
-              final user = FirebaseAuth.instance.currentUser;
-              print(user);
-              if (user == null || !user.emailVerified) {
+              final user = AuthService.firebase().currentUser;
+              if (user == null || !user.isEmailVerified) {
                 return LoginView();
               }
               else {

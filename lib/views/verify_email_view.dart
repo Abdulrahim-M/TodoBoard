@@ -1,6 +1,12 @@
-import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:developer' as dev;
+
 import 'package:flutter/material.dart';
 import 'package:rpg_life_app/constants/routes.dart';
+
+import '../services/auth/auth_exceptions.dart';
+import '../services/auth/auth_service.dart';
+import '../services/auth/auth_user.dart';
+import '../utilities/show_error_dialog.dart';
 
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
@@ -10,13 +16,13 @@ class VerifyEmailView extends StatefulWidget {
 }
 
 class _VerifyEmailViewState extends State<VerifyEmailView> with WidgetsBindingObserver {
-  User? user;
+  late AuthUser user;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    user = FirebaseAuth.instance.currentUser;
+    user = AuthService.firebase().currentUser!;
   }
 
   @override
@@ -34,10 +40,9 @@ class _VerifyEmailViewState extends State<VerifyEmailView> with WidgetsBindingOb
   }
 
   Future<void> _checkEmailVerified() async {
-    await user?.reload(); // Refresh the user
-    user = FirebaseAuth.instance.currentUser;
+    user = AuthService.firebase().currentUser!;
 
-    if (user?.emailVerified ?? false) {
+    if (user.isEmailVerified) {
       // Navigate to home or success screen
       Navigator.of(context).pushNamedAndRemoveUntil(homeRoute, (route) => false);
     } else {
@@ -53,8 +58,9 @@ class _VerifyEmailViewState extends State<VerifyEmailView> with WidgetsBindingOb
         title: const Text("Verify Email"),
       ),
 
-      body:
-        Column(
+      body: Container(
+        alignment: Alignment.center,
+        child: Column(
           children: [
             Container(
               margin: EdgeInsets.all(10),
@@ -68,9 +74,8 @@ class _VerifyEmailViewState extends State<VerifyEmailView> with WidgetsBindingOb
 
                 child: Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Your Email ${user?.email ?? ''} is not verified. "
-                      "lease Verify Your Email by pressing "
-                      "the button below, then check your email inbox.",
+                  child: Text("An Email Verification was sent to ${user?.email ?? ''}"
+                      "\nPlease check your email inbox and verify your email",
                   ),
                 ),
               ),
@@ -78,14 +83,20 @@ class _VerifyEmailViewState extends State<VerifyEmailView> with WidgetsBindingOb
 
             TextButton(
               onPressed: () async {
-                final user = FirebaseAuth.instance.currentUser;
-                await user?.sendEmailVerification();
-                print(user);
+                try {
+                  AuthService.firebase().sendEmailVerification();
+                } on GenericAuthAuthException catch (e) {
+                  showErrorDialog(context, "Authentication error while registering",);
+                  return;
+                } catch (e) {
+                  showErrorDialog(context, e.toString());
+                  return;
+                }
               },
-              child: Text("Send email verification"),
+              child: Text("Send email verification again"),
             ),
           ]
-        )
+        ))
     );
   }
 }
