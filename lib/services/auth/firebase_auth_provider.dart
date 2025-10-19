@@ -1,4 +1,7 @@
-import 'dart:io';
+import 'dart:developer' as dev;
+
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'dart:io' show Platform;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -104,15 +107,24 @@ class FirebaseAuthProvider implements AuthProvider {
 
     // Set up the emulator for Firebase
     if(useEmulator) {
-      final localHostString = Platform.isAndroid ? '10.0.2.2' : 'localhost';
+      if (!kIsWeb) {
+        dev.log("Using emulator on ${Platform.isAndroid ? "Android" : "iOS or Desktop."}");
+        final localHostString = Platform.isAndroid ? '10.0.2.2' : 'localhost'; //'10.0.2.2'
 
-      FirebaseFirestore.instance.settings = Settings(
-        host: '$localHostString:8080',
-        sslEnabled: false,
-        persistenceEnabled: false,
-      );
+        FirebaseFirestore.instance.settings = Settings(
+          host: '$localHostString:8080',
+          sslEnabled: false,
+          persistenceEnabled: false,
+        );
 
-      await FirebaseAuth.instance.useAuthEmulator(localHostString, 9099);
+        await FirebaseAuth.instance.useAuthEmulator(localHostString, 9099);
+      } else {
+        dev.log("Using emulator on Web.");
+        await FirebaseAuth.instance.useAuthEmulator('localhost', 9099);
+        FirebaseFirestore.instance.useFirestoreEmulator('localhost', 8080);
+      }
+    } else {
+      dev.log("Using real Firebase, not emulator");
     }
 
     await FirebaseAuth.instance.currentUser?.reload();

@@ -1,5 +1,6 @@
 import 'package:rpg_life_app/services/auth/auth_exceptions.dart';
 import 'package:rpg_life_app/services/auth/auth_provider.dart';
+import 'package:rpg_life_app/services/auth/auth_service.dart';
 import 'package:rpg_life_app/services/auth/auth_user.dart';
 import 'package:test/test.dart';
 
@@ -56,6 +57,7 @@ void main() {
       expect(user, isNotNull);
     });
   });
+
 }
 
 class NotInitializedException implements Exception {}
@@ -86,7 +88,7 @@ class MockAuthProvider implements AuthProvider {
     if (!_isInitialised) throw NotInitializedException();
     if (email == 'foo@bar.com') throw UserNotFoundAuthException();
     if (password == 'foobar') throw WrongPasswordAuthException();
-    final user = AuthUser(isEmailVerified: false, email: email);
+    final user = AuthUser(id: 'my_id', isEmailVerified: false, email: email, displayName: '', photoUrl: '', phoneNumber: '');
     _user = user;
     return Future.value(user);
   }
@@ -104,7 +106,7 @@ class MockAuthProvider implements AuthProvider {
     if (!_isInitialised) throw NotInitializedException();
     final user = _user;
     if (user == null) throw UserNotLoggedInAuthException();
-    final newUser = AuthUser(isEmailVerified: true, email: user.email);
+    final newUser = AuthUser(id: 'my_id', isEmailVerified: true, email: user.email, displayName: '', photoUrl: '', phoneNumber: '');
     _user = newUser;
     return await Future.value(null);
 

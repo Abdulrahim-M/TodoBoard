@@ -3,10 +3,11 @@ import 'dart:developer' as dev;
 import 'package:flutter/material.dart';
 import 'package:rpg_life_app/constants/routes.dart';
 
-import '../services/auth/auth_exceptions.dart';
-import '../services/auth/auth_service.dart';
-import '../services/auth/auth_user.dart';
-import '../utilities/show_error_dialog.dart';
+import '../../constants/palette.dart' as clr;
+import '../../utilities/dialogs/dialogs.dart';
+import '../../services/auth/auth_exceptions.dart';
+import '../../services/auth/auth_service.dart';
+import '../../services/auth/auth_user.dart';
 
 class VerifyEmailView extends StatefulWidget {
   const VerifyEmailView({super.key});
@@ -86,10 +87,10 @@ class _VerifyEmailViewState extends State<VerifyEmailView> with WidgetsBindingOb
                 try {
                   AuthService.firebase().sendEmailVerification();
                 } on GenericAuthAuthException catch (e) {
-                  showErrorDialog(context, "Authentication error while registering",);
+                  showErrorDialog(context, "Authentication error while registering", clr.error);
                   return;
                 } catch (e) {
-                  showErrorDialog(context, e.toString());
+                  showErrorDialog(context, e.toString(), clr.error);
                   return;
                 }
               },

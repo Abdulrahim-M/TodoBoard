@@ -1,0 +1,175 @@
+
+import 'package:flutter/material.dart';
+import 'package:rpg_life_app/services/crud/task_service.dart';
+import 'package:rpg_life_app/constants/palette.dart' as clr;
+
+import '../../utilities/dialogs/dialogs.dart';
+
+late bool _isEditing;
+
+class EditTaskView extends StatefulWidget {
+  final Map<DatabaseTask?, bool> data;
+
+  const EditTaskView({required this.data, super.key});
+
+  @override
+  State<EditTaskView> createState() => _EditTaskViewState();
+}
+
+class _EditTaskViewState extends State<EditTaskView> {
+  late final TasksService _tasksService;
+  late final TextEditingController _nameController;
+  late final TextEditingController _noteController;
+  late final DatabaseTask? _task;
+  late final bool _isNew;
+
+  Future<DatabaseTask> _createTask(String name, String note) async {
+    return await _tasksService.createTask(name: name, note: note);
+  }
+
+  Future<DatabaseTask> _updateTask(String name, String note) async {
+    return await _tasksService.updateTask(task: _task!, name: name, note: note);
+  }
+
+  Future<void> _deleteTask() async {
+    return await _tasksService.deleteTask(id: _task!.id);
+  }
+
+  @override
+  void initState() {
+    _tasksService = TasksService();
+    _nameController = TextEditingController();
+    _noteController = TextEditingController();
+    _task = widget.data.keys.first;
+    _isNew = widget.data.values.first;
+    if (!_isNew) {
+      _nameController.text = _task!.name;
+      _noteController.text = _task.note;
+    }
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _noteController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _isEditing = false;
+
+    return PopScope<Object?>(
+        canPop: false,
+        onPopInvokedWithResult: (bool didPop, Object? result) async {
+          if (didPop) {
+            return;
+          }
+          final bool shouldPop = await showExitWithoutSaveDialog(context);
+          if (context.mounted && shouldPop) {
+            Navigator.pop(context);
+          }
+        },
+        child: Scaffold(
+          backgroundColor: clr.background,
+          appBar: AppBar(
+            backgroundColor: clr.onPrimary,
+
+            title: _isNew ?
+            const Text("Create Task", style: TextStyle(color: clr.textPrimary),) :
+            SizedBox.square(),
+
+            actions: [
+              !_isNew ?
+              IconButton(
+                onPressed: () async {
+                  if (_nameController.text.isNotEmpty){
+                    if (await deleteTaskDialog(context)) {
+                      _deleteTask();
+                      Navigator.of(context).pop();
+                    }
+                  }
+                },
+                icon: Text("DELETE", style:
+                TextStyle(
+                  fontSize: 15,
+                  color: clr.textSecondary,
+                )),
+              ) : SizedBox.square(),
+              _isNew ?
+              IconButton(
+                onPressed: () {
+                  if (_nameController.text.isNotEmpty){
+                    _createTask(_nameController.text, _noteController.text);
+                    Navigator.of(context).pop();
+                  }
+                },
+                icon: Text("CREATE", style:
+                TextStyle(
+                  fontSize: 15,
+                  color: clr.textSecondary,
+                )),
+              ) :
+              IconButton(
+                  onPressed: () {
+                    if (_nameController.text.isNotEmpty){
+                      _updateTask(_nameController.text, _noteController.text);
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  icon: Text("SAVE", style:
+                  TextStyle(
+                    fontSize: 15,
+                    color: clr.textSecondary,
+                  )),
+              ),
+            ],
+
+            bottom: PreferredSize(
+              preferredSize: Size(0.0, 200),
+              child: Container(
+                padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
+                child: Column(
+                  spacing: 20,
+                  children: [
+                    TextField(
+                      controller: _nameController,
+                      style: TextStyle(color: clr.textPrimary),
+                      decoration: InputDecoration(
+                        // border: OutlineInputBorder(),
+                        fillColor: clr.dialogBG,
+                        filled: true,
+                        label: Text("Task Title"),
+                        labelStyle: TextStyle(color: clr.textSecondary),
+                      ),
+                      autofocus: true,
+                      onChanged: (value) {
+                        _isEditing = true;
+                      },
+                    ),
+                    TextField(
+                      controller: _noteController,
+                      style: TextStyle(color: clr.textPrimary),
+                      decoration: InputDecoration(
+                        // border: OutlineInputBorder(),
+                        fillColor: clr.dialogBG,
+                        filled: true,
+                        label: Text("Decoration"),
+                        labelStyle: TextStyle(color: clr.textDisabled),
+                      ),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: null,
+                    ),
+                    Card()
+                  ],
+                ),
+              ),
+            ),
+          ),
+          body: Container(),
+        )
+
+    );
+  }
+}

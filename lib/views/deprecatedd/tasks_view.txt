@@ -1,0 +1,225 @@
+import 'package:flutter/material.dart';
+import 'package:rpg_life_app/constants/palette.dart' as clr;
+import 'dart:developer'as dev;
+
+import 'package:rpg_life_app/constants/routes.dart';
+import 'package:rpg_life_app/services/auth/auth_service.dart';
+import 'package:rpg_life_app/services/crud/task_service.dart';
+import 'package:rpg_life_app/views/loading_view.dart';
+import 'package:rpg_life_app/views/deprecated/tasks_list_view.dart';
+
+import '../../utilities/dialogs/dialogs.dart';
+
+enum MenuAction {
+  MakeTask,
+  Account,
+  Settings,
+  SignOut,
+  About,
+}
+class TasksView extends StatefulWidget {
+  const TasksView({super.key});
+
+  @override
+  State<TasksView> createState() => _TasksViewState();
+}
+
+class _TasksViewState extends State<TasksView> with WidgetsBindingObserver {
+  late final TasksService _tasksService;
+  late Future _tasksServiceFuture;
+  int _selectedIndex = 0;
+  String get userEmail => "asd"; //AuthService.firebase().currentUser!.email!;
+
+  static const List<Widget> _pages = <Widget>[
+    Center(child: Text('Tasks')),
+    Center(child: Text('Todo')),
+    Center(child: Text('Done')),
+    Center(child: Text('Profile')),
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
+  @override
+  void initState() {
+    _tasksService = TasksService();
+    _tasksServiceFuture = _tasksService.open(email: userEmail);
+    dev.log("User email: $userEmail");
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  // Called when app resumes (e.g., from background)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: clr.background,
+      appBar: AppBar(
+        backgroundColor: clr.background,
+
+        title: const Text("Tasks", style: TextStyle(color: clr.textPrimary),),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.of(context).pushNamed(editTaskRoute, arguments: {null: true});
+              },
+              color: clr.secondary,
+              icon: const Icon(Icons.add)
+          ),
+          PopupMenuButton<MenuAction>(
+            iconColor: clr.secondary,
+            onSelected: (value) async {
+              dev.log(value.toString());
+              switch (value) {
+                case MenuAction.MakeTask:
+                  WidgetsBinding.instance.addPostFrameCallback((_){
+                    Navigator.of(context).pushNamed(editTaskRoute, arguments: {null: true});
+                  });
+                case MenuAction.SignOut:
+                  dev.log("Sign out");
+                  switch (await showLogOutDialog(context)) {
+                    case true:
+                      AuthService.firebase().logout();
+                      Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (route) => false);
+                    case false:
+                      dev.log("Sign out cancelled");
+                  }
+                  break;
+                case MenuAction.Account:
+                  dev.log("Account Details");
+                  // TODO: Handle this case.
+                  throw UnimplementedError();
+                case MenuAction.Settings:
+                  dev.log("Settings");
+                  // TODO: Handle this case.
+                  throw UnimplementedError();
+                case MenuAction.About:
+                  dev.log("About");
+                  return showAboutDialog(
+                      context: context,
+                      applicationName: "RPG Life Project",
+                      applicationVersion: "0.2.0-beta",
+                      applicationIcon: const Icon(Icons.android),
+                      applicationLegalese: "© 2025 RADGIT"
+                  );
+              }
+            },
+            itemBuilder: (context) {
+              return const [
+                PopupMenuItem<MenuAction>(
+                  value: MenuAction.MakeTask,
+                  child: Text('Create Task'),
+                ),
+                PopupMenuItem<MenuAction>(
+                  value: MenuAction.Account,
+                  child: Text('Account'),
+                ),
+                PopupMenuItem<MenuAction>(
+                  value: MenuAction.Settings,
+                  child: Text('Settings'),
+                ),
+                PopupMenuItem<MenuAction>(
+                  value: MenuAction.SignOut,
+                  child: Text('Sign Out'),
+                ),
+                PopupMenuItem<MenuAction>(
+                  value: MenuAction.About,
+                  child: Text('About'),
+                ),
+              ];
+            },
+          ),
+        ],
+      ),
+
+      body: _selectedIndex == 2 ?
+      Center(child: Text('Page $_selectedIndex'),) :
+
+      FutureBuilder(
+          future: _tasksServiceFuture,
+          builder: (context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.done:
+                return StreamBuilder(
+                    stream: _tasksService.tasksStream,
+                    builder: (context, snapshot) {
+                      switch(snapshot.connectionState) {
+                        case ConnectionState.active:
+                          if (snapshot.hasData) {
+                            final allTasks = snapshot.data as List<DatabaseTask>;
+                            return TasksListView(allTasks: allTasks, toggleTask: (DatabaseTask task) {
+                              _tasksService.checkOrUncheckTask(task: task);
+                              return task.isCompleted;
+                            }, selectedIndex: _selectedIndex,);
+                          } else {
+                            return LoadingView();
+                          }
+
+                        default:
+                          return Center(child: Text("Waiting for tasks..."),);
+                      }
+                    }
+                );
+              default:
+                return LoadingView();
+            }
+          },
+        ),
+
+    //_pages[_selectedIndex],
+
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        elevation: 5,
+        iconSize: 30,
+        selectedFontSize: 15,
+        unselectedFontSize: 15,
+        backgroundColor: clr.background,
+        selectedItemColor: clr.primary,
+        unselectedItemColor: clr.textDisabled,
+        type: BottomNavigationBarType.fixed,
+
+        items: List.generate(3, (index) {
+          bool isSelected = _selectedIndex == index;
+
+          Map<String, IconData> taps = {
+            'Tasks': Icons.list_alt,
+            'Done': Icons.done_all,
+            'Profile': Icons.person,
+          };
+
+          return BottomNavigationBarItem(
+
+            icon: Column(
+              children: [
+                AnimatedContainer(
+                  duration: Duration(milliseconds: 300),
+                  height: 4,
+                  width: isSelected ? 24 : 0,
+                  decoration: BoxDecoration(
+                    color: clr.primary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                SizedBox(height: 4),
+                Icon(taps.values.elementAt(index)),
+              ],
+            ),
+            label: taps.keys.elementAt(index),
+          );
+        }),
+      ),
+    );
+  }
+}
