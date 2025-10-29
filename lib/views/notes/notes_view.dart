@@ -11,6 +11,7 @@ import 'package:todo_board/views/tasks/tasks_list_view.dart';
 import 'package:todo_board/widgets/usage_details.dart';
 
 import '../../services/auth/auth_service.dart';
+import 'notes_list_view.dart';
 
 enum MenuAction {
   makeTask,
@@ -18,23 +19,16 @@ enum MenuAction {
   settings,
 }
 
-class TasksView extends StatefulWidget {
-  final bool showCompleted;
-
-  const TasksView({super.key, required this.showCompleted});
+class NotesView extends StatefulWidget {
+  const NotesView({super.key});
 
   @override
-  State<TasksView> createState() => _TasksViewState();
+  State<NotesView> createState() => _NotesViewState();
 }
 
-class _TasksViewState extends State<TasksView> {
+class _NotesViewState extends State<NotesView> {
   late final TasksService _tasksService;
-  late List<DatabaseTask> allTasks;
-  final _completed = ValueNotifier<int>(0);
-  final _total = ValueNotifier<int>(0);
-
-  List<DatabaseTask> get completedTasks => allTasks.where((task) => task.isCompleted).toList();
-  List<DatabaseTask> get uncompletedTasks => allTasks.where((task) => !task.isCompleted).toList();
+  late List<DatabaseNote> allNotes;
 
   @override
   void initState() {
@@ -59,19 +53,9 @@ class _TasksViewState extends State<TasksView> {
         backgroundColor: clr.background,
         title: const Text("Tasks", style: TextStyle(color: clr.textPrimary),),
         actions: [
-          widget.showCompleted ?
-          IconButton(
-              onPressed: () async {
-                if (await showDeleteAllDialog(context)) {
-                  _tasksService.deleteCompletedTasks();
-                  _completed.value = 0;
-                }
-              },
-              icon: const Icon(Icons.delete)
-          ) : SizedBox.square(),
           IconButton(
               onPressed: () {
-                Navigator.of(context).pushNamed(editTaskRoute, arguments: {null: true});
+                Navigator.of(context).pushNamed(editNoteRoute, arguments: null);
               },
               color: clr.secondary,
               icon: const Icon(Icons.add)
@@ -121,36 +105,25 @@ class _TasksViewState extends State<TasksView> {
 
       body: CustomScrollView(
         slivers: [
-
-          SliverToBoxAdapter(
-            child:
-              UsageDetailsRow(completedTasks: _completed, totalTasks: _total).build(context)
-          ),
-
           SliverToBoxAdapter(
             child: StreamBuilder(
-                stream: _tasksService.tasksStream,
+                stream: _tasksService.notesStream,
                 builder: (context, snapshot) {
                   switch(snapshot.connectionState) {
                     case ConnectionState.active:
                       if (snapshot.hasData) {
-                        allTasks = snapshot.data as List<DatabaseTask>;
-                        WidgetsBinding.instance.addPostFrameCallback((_){
-                          _completed.value = completedTasks.length;
-                          _total.value = allTasks.length;
-                        });
-                        List<DatabaseTask> tasks = widget.showCompleted ? completedTasks : uncompletedTasks;
-                        return TasksListView(tasks: tasks, toggleTask: (DatabaseTask task) {
-                          _tasksService.checkOrUncheckTask(task: task);
-                        }, deleteTask: (DatabaseTask task) {
-                          _tasksService.deleteTask(id: task.id);
+                        allNotes = snapshot.data as List<DatabaseNote>;
+                        return NotesListView(notes: allNotes, pinNote: (DatabaseNote note) {
+                          _tasksService.pinOrUnpinNote(note: note);
+                        }, deleteNote: (DatabaseNote note) {
+                          _tasksService.deleteTask(id: note.id);
                         });
                       } else {
                         return LoadingView();
                       }
 
                     default:
-                      return Center(child: Text("Waiting for tasks...", style: TextStyle(color: clr.textPrimary)),);
+                      return Center(child: Text("Waiting for notes...", style: TextStyle(color: clr.textPrimary)),);
                   }
                 },
             ),

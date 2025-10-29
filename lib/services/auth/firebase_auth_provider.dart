@@ -127,7 +127,12 @@ class FirebaseAuthProvider implements AuthProvider {
       dev.log("Using real Firebase, not emulator");
     }
 
-    await FirebaseAuth.instance.currentUser?.reload();
+    try {
+      await FirebaseAuth.instance.currentUser?.reload();
+    }
+    catch (e) {
+      FirebaseAuth.instance.signOut();
+    }
 
   }
 

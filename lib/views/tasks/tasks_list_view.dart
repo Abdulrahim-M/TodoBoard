@@ -1,12 +1,12 @@
 
 import 'dart:developer' as dev;
 
-import 'package:rpg_life_app/constants/palette.dart' as clr;
+import 'package:todo_board/constants/palette.dart' as clr;
 
 import 'package:flutter/material.dart';
-import 'package:rpg_life_app/services/crud/task_service.dart';
+import 'package:todo_board/services/crud/task_service.dart';
 
-import 'package:rpg_life_app/constants/routes.dart';
+import 'package:todo_board/constants/routes.dart';
 
 typedef TaskCallback = void Function(DatabaseTask task);
 

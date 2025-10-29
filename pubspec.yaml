@@ -1,4 +1,4 @@
-name: rpg_life_app
+name: todo_board
 description: "A new Flutter project."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -43,6 +43,7 @@ dependencies:
   path_provider: ^2.1.5
   path: ^1.9.1
   salomon_bottom_bar: ^3.3.2
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:

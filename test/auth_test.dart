@@ -1,7 +1,7 @@
-import 'package:rpg_life_app/services/auth/auth_exceptions.dart';
-import 'package:rpg_life_app/services/auth/auth_provider.dart';
-import 'package:rpg_life_app/services/auth/auth_service.dart';
-import 'package:rpg_life_app/services/auth/auth_user.dart';
+import 'package:todo_board/services/auth/auth_exceptions.dart';
+import 'package:todo_board/services/auth/auth_provider.dart';
+import 'package:todo_board/services/auth/auth_service.dart';
+import 'package:todo_board/services/auth/auth_user.dart';
 import 'package:test/test.dart';
 
 void main() {

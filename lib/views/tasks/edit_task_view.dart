@@ -1,8 +1,8 @@
 
 import 'package:flutter/material.dart';
-import 'package:rpg_life_app/services/crud/task_service.dart';
-import 'package:rpg_life_app/constants/palette.dart' as clr;
-import 'package:rpg_life_app/views/coming_soon_view.dart';
+import 'package:todo_board/services/crud/task_service.dart';
+import 'package:todo_board/constants/palette.dart' as clr;
+import 'package:todo_board/views/coming_soon_view.dart';
 
 import '../../utilities/dialogs/dialogs.dart';
 

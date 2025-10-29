@@ -1,6 +1,6 @@
 {
-    "name": "rpg_life_app",
-    "short_name": "rpg_life_app",
+    "name": "todo_board",
+    "short_name": "todo_board",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

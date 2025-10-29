@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:rpg_life_app/constants/palette.dart' as clr;
+import 'package:todo_board/constants/palette.dart' as clr;
 
 class UsageDetailsRow extends StatelessWidget {
   final ValueNotifier<int> completedTasks;

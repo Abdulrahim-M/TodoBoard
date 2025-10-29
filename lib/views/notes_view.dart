@@ -29,7 +29,10 @@ class TasksView extends StatefulWidget {
 
 class _TasksViewState extends State<TasksView> {
   late final TasksService _tasksService;
+  late final AuthService _authService;
   late List<DatabaseTask> allTasks;
+  late List<DatabaseTask> allNotes;
+
   final _completed = ValueNotifier<int>(0);
   final _total = ValueNotifier<int>(0);
 
@@ -39,6 +42,7 @@ class _TasksViewState extends State<TasksView> {
   @override
   void initState() {
     _tasksService = TasksService();
+    _authService = AuthService.firebase();
     super.initState();
   }
 
@@ -57,18 +61,8 @@ class _TasksViewState extends State<TasksView> {
           icon: Icon(Icons.menu, color: clr.textPrimary),
         ),
         backgroundColor: clr.background,
-        title: const Text("Tasks", style: TextStyle(color: clr.textPrimary),),
+        title: const Text("Notes", style: TextStyle(color: clr.textPrimary),),
         actions: [
-          widget.showCompleted ?
-          IconButton(
-              onPressed: () async {
-                if (await showDeleteAllDialog(context)) {
-                  _tasksService.deleteCompletedTasks();
-                  _completed.value = 0;
-                }
-              },
-              icon: const Icon(Icons.delete)
-          ) : SizedBox.square(),
           IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed(editTaskRoute, arguments: {null: true});
@@ -103,7 +97,7 @@ class _TasksViewState extends State<TasksView> {
               return [
                 PopupMenuItem<MenuAction>(
                   value: MenuAction.makeTask,
-                  child: Text('Create Task'),
+                  child: Text('Create Note'),
                 ),
                 PopupMenuItem<MenuAction>(
                   value: MenuAction.settings,
@@ -121,12 +115,6 @@ class _TasksViewState extends State<TasksView> {
 
       body: CustomScrollView(
         slivers: [
-
-          SliverToBoxAdapter(
-            child:
-              UsageDetailsRow(completedTasks: _completed, totalTasks: _total).build(context)
-          ),
-
           SliverToBoxAdapter(
             child: StreamBuilder(
                 stream: _tasksService.tasksStream,

@@ -1,7 +1,7 @@
 import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
-import 'package:rpg_life_app/constants/routes.dart';
+import 'package:todo_board/constants/routes.dart';
 
 import '../../constants/palette.dart' as clr;
 import '../../utilities/dialogs/dialogs.dart';

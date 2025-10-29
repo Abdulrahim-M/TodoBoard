@@ -1,6 +1,23 @@
-# rpg_life_app
+# TodoBoard App
 
-A new Flutter project.
+## Introduction
+
+TodoBoard is a mobile application built with Flutter to help you organize your tasks and projects.
+
+## Features
+
+*   Simple and intuitive task management.
+*   Organize tasks into different boards.
+*   Track the status of your tasks.
+*   ... (more features to come)
+
+**This project is currently under development. Features may change and the app is not yet feature-complete.**
+
+## Screenshots
+
+|   ![Hosted Image](https://imgur.com/ppHO4Qt)    |   ![Hosted Image](https://imgur.com/QkjdqNS)    |   ![Hosted Image](https://imgur.com/hPOk78y)    |
+| :----------: | :----------: | :----------: |
+
 
 ## Getting Started
 

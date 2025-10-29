@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rpg_life_app/utilities/dialogs/generic_dialog.dart';
+import 'package:todo_board/utilities/dialogs/generic_dialog.dart';
 
 import '../../constants/palette.dart' as clr;
 

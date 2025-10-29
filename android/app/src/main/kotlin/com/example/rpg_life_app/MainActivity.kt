@@ -1,4 +1,4 @@
-package com.example.rpg_life_app
+package com.example.todo_board
 
 import io.flutter.embedding.android.FlutterActivity
 
