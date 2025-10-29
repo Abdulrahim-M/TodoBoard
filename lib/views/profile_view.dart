@@ -49,7 +49,7 @@ class _ProfileViewState extends State<ProfileView> {
                             radius: 40,
                             backgroundColor: clr.textDisabled,
                             child: Text(
-                              _user.displayName?.substring(0, 1).toUpperCase() ?? '?',
+                              _user.displayName?.toUpperCase() ?? '?',
                               style: TextStyle(
                                 fontSize: 30,
                                 color: clr.background,

@@ -11,6 +11,7 @@ import 'package:rpg_life_app/views/tasks/tasks_view.dart';
 import '../constants/routes.dart';
 import '../services/auth/auth_service.dart';
 import '../services/auth/auth_user.dart';
+import 'notes/notes_view.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -22,23 +23,22 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with WidgetsBindingObserver {
   late final AuthService _authService;
   late final TasksService _tasksService;
-  late final AuthUser _user;
+  late final String _email;
   late Future _tasksServiceFuture;
   int _selectedIndex = 0;
 
   final List<Widget> _pages = <Widget>[
     TasksView(showCompleted: false,),
     TasksView(showCompleted: true,),
-    ComingSoon(),
+    NotesView(),
   ];
 
   @override
   void initState() {
     _tasksService = TasksService();
     _authService = AuthService.firebase();
-    _user = _authService.currentUser!;
-    String email = _user.email;
-    _tasksServiceFuture = _tasksService.open(email: email);
+    _email = "email@mail.com";//_authService.currentUser!.email;
+    _tasksServiceFuture = _tasksService.open(email: _email);
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
@@ -69,7 +69,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                     _buildItem(
                       title: "Tasks",
                       icon: Icons.list_alt,
-                      onTap: () {},
+                      onTap: () { Navigator.of(context).pushNamedAndRemoveUntil(homeRoute, (route) => false); },
                     ),
                     _buildItem(
                       title: "Notification",
@@ -131,7 +131,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             radius: 40,
             backgroundColor: clr.textDisabled,
             child: Text(
-              _authService.currentUser?.displayName?.substring(0, 1).toUpperCase() ?? '?',
+              _authService.currentUser?.displayName?.toUpperCase() ?? '?',
               style: TextStyle(
                 fontSize: 30,
                 color: clr.background,
@@ -139,7 +139,7 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
             ),
           ),
           SizedBox(height: 20,),
-          Text(_authService.currentUser!.email!, style: TextStyle(color: clr.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),),
+          Text(_email, style: TextStyle(color: clr.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),),
         ],
       ),
     );

@@ -16,7 +16,6 @@ enum MenuAction {
   makeTask,
   about,
   settings,
-  signOut,
 }
 
 class TasksView extends StatefulWidget {
@@ -30,7 +29,6 @@ class TasksView extends StatefulWidget {
 
 class _TasksViewState extends State<TasksView> {
   late final TasksService _tasksService;
-  late final AuthService _authService;
   late List<DatabaseTask> allTasks;
   final _completed = ValueNotifier<int>(0);
   final _total = ValueNotifier<int>(0);
@@ -41,7 +39,6 @@ class _TasksViewState extends State<TasksView> {
   @override
   void initState() {
     _tasksService = TasksService();
-    _authService = AuthService.firebase();
     super.initState();
   }
 
@@ -87,16 +84,6 @@ class _TasksViewState extends State<TasksView> {
                   WidgetsBinding.instance.addPostFrameCallback((_){
                     Navigator.of(context).pushNamed(editTaskRoute, arguments: {null: true});
                   });
-                case MenuAction.signOut:
-                  dev.log("Sign out");
-                  switch (await showLogOutDialog(context)) {
-                    case true:
-                      _authService.logout();
-                      Navigator.of(context).pushNamedAndRemoveUntil(loginRoute, (route) => false);
-                    case false:
-                      dev.log("Sign out cancelled");
-                  }
-                  break;
                 case MenuAction.settings:
                   dev.log("Settings");
                   // TODO: Handle this case.
@@ -134,13 +121,6 @@ class _TasksViewState extends State<TasksView> {
 
       body: CustomScrollView(
         slivers: [
-          // SliverAppBar(
-          //     pinned: false,
-          //     floating: false,
-          //     backgroundColor: clr.background,
-          //     expandedHeight: 56,
-          //     flexibleSpace: ,
-          // ),
 
           SliverToBoxAdapter(
             child:
@@ -173,13 +153,6 @@ class _TasksViewState extends State<TasksView> {
                       return Center(child: Text("Waiting for tasks...", style: TextStyle(color: clr.textPrimary)),);
                   }
                 },
-            ),
-          ),
-          SliverToBoxAdapter(
-            child: Column(
-              children: [
-
-              ],
             ),
           ),
         ],
