@@ -1,7 +1,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:todo_board/services/crud/task_service.dart';
-import 'package:todo_board/constants/palette.dart' as clr;
 import 'package:todo_board/views/coming_soon_view.dart';
 
 import '../../utilities/dialogs/dialogs.dart';
@@ -86,12 +85,9 @@ class _EditTaskViewState extends State<EditTaskView> {
           }
         },
         child: Scaffold(
-          backgroundColor: clr.background,
           appBar: AppBar(
-            backgroundColor: clr.onPrimary,
-
             title: _isNew ?
-            const Text("Create Task", style: TextStyle(color: clr.textPrimary),) :
+            Text("Create Task", style: Theme.of(context).textTheme.bodyMedium) :
             SizedBox.square(),
 
             actions: [
@@ -105,11 +101,7 @@ class _EditTaskViewState extends State<EditTaskView> {
                     }
                   }
                 },
-                icon: Text("DELETE", style:
-                TextStyle(
-                  fontSize: 15,
-                  color: clr.textSecondary,
-                )),
+                icon: Text("DELETE", style: Theme.of(context).textTheme.bodyMedium),
               ) : SizedBox.square(),
               _isNew ?
               IconButton(
@@ -119,25 +111,16 @@ class _EditTaskViewState extends State<EditTaskView> {
                     Navigator.of(context).pop();
                   }
                 },
-                icon: Text("CREATE", style:
-                TextStyle(
-                  fontSize: 15,
-                  color: clr.textSecondary,
-                )),
+                icon: Text("CREATE", style: Theme.of(context).textTheme.bodyMedium),
               ) :
               IconButton(
-                  onPressed: () {
-                    if (_nameController.text.isNotEmpty && (_isNew ? true : _isChanged())){
-                      _updateTask(_nameController.text, _noteController.text);
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  icon: Text("SAVE", style:
-                  TextStyle(
-                    fontSize: 15,
-                    color: clr.textSecondary,
-                  )),
-                disabledColor: clr.textDisabled,
+                onPressed: () {
+                  if (_nameController.text.isNotEmpty && (_isNew ? true : _isChanged())){
+                    _updateTask(_nameController.text, _noteController.text);
+                    Navigator.of(context).pop();
+                  }
+                },
+                icon: Text("SAVE", style: Theme.of(context).textTheme.bodyMedium),
 
               ),
             ],
@@ -146,32 +129,29 @@ class _EditTaskViewState extends State<EditTaskView> {
             slivers: [
               SliverToBoxAdapter(
                 child: Container(
-                  color: clr.onPrimary,
                   padding: EdgeInsets.fromLTRB(20, 0, 20, 0),
                   child: Column(
                     spacing: 20,
                     children: [
                       TextField(
                         controller: _nameController,
-                        style: TextStyle(color: clr.textPrimary),
+                        style: Theme.of(context).textTheme.bodyLarge,
                         decoration: InputDecoration(
                           // border: OutlineInputBorder(),
-                          fillColor: clr.dialogBG,
                           filled: true,
                           label: Text("Task Title"),
-                          labelStyle: TextStyle(color: clr.textSecondary),
+                          labelStyle: Theme.of(context).textTheme.bodyMedium,
                         ),
                         autofocus: true,
                       ),
                       TextField(
                         controller: _noteController,
-                        style: TextStyle(color: clr.textPrimary),
+                        style: Theme.of(context).textTheme.bodyLarge,
                         decoration: InputDecoration(
                           // border: OutlineInputBorder(),
-                          fillColor: clr.dialogBG,
                           filled: true,
-                          label: Text("Decoration"),
-                          labelStyle: TextStyle(color: clr.textDisabled),
+                          label: Text("Note"),
+                          labelStyle: Theme.of(context).textTheme.bodyMedium,
                         ),
                         keyboardType: TextInputType.multiline,
                         maxLines: null,

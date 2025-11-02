@@ -6,7 +6,6 @@ import 'package:todo_board/constants/routes.dart';
 import 'package:todo_board/services/auth/auth_exceptions.dart';
 import 'package:todo_board/services/auth/auth_service.dart';
 
-import '../../constants/palette.dart' as clr;
 import '../../utilities/dialogs/dialogs.dart';
 
 class RegisterView extends StatefulWidget {
@@ -108,7 +107,7 @@ class _RegisterViewState extends State<RegisterView> {
                       TextButton(
                         onPressed: () async {
                           if (_password.text != _passwordAgain.text) {
-                            showErrorDialog(context, "Passwords do not match", clr.error);
+                            showErrorDialog(context, "Passwords do not match", DialogLevel.error);
                             setState(() {_password.clear(); _passwordAgain.clear();});
                           } else {
                             final email = _email.text;
@@ -120,19 +119,19 @@ class _RegisterViewState extends State<RegisterView> {
                               );
                               AuthService.firebase().sendEmailVerification();
                             } on EmailAlreadyInUseAuthException catch (e) {
-                              showErrorDialog(context, "Email already in use", clr.error);
+                              showErrorDialog(context, "Email already in use", DialogLevel.error);
                               return;
                             } on WeakPasswordAuthException catch (e) {
-                              showErrorDialog(context, "Weak password", clr.error);
+                              showErrorDialog(context, "Weak password", DialogLevel.error);
                               return;
                             } on InvalidEmailAuthException catch (e) {
-                              showErrorDialog(context, "Invalid email", clr.error);
+                              showErrorDialog(context, "Invalid email", DialogLevel.error);
                               return;
                               // } on GenericAuthAuthException catch (e) {
                               //   showErrorDialog(context, "Authentication error while registering",);
                               //   return;
                             } catch (e) {
-                              showErrorDialog(context, e.toString(), clr.error);
+                              showErrorDialog(context, e.toString(), DialogLevel.error);
                               return;
                             }
                             final user = AuthService.firebase().currentUser;

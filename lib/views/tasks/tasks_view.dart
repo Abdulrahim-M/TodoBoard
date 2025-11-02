@@ -2,15 +2,16 @@
 import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
-import 'package:todo_board/constants/palette.dart' as clr;
 import 'package:todo_board/constants/routes.dart';
 import 'package:todo_board/services/crud/task_service.dart';
-import 'package:todo_board/utilities/dialogs/dialogs.dart';
 import 'package:todo_board/views/loading_view.dart';
 import 'package:todo_board/views/tasks/tasks_list_view.dart';
 import 'package:todo_board/widgets/usage_details.dart';
 
-import '../../services/auth/auth_service.dart';
+import '../../constants/palette3.dart';
+
+// TODO: fix the filter, currently there are too many classes involved without it even working
+
 
 enum MenuAction {
   makeTask,
@@ -19,9 +20,7 @@ enum MenuAction {
 }
 
 class TasksView extends StatefulWidget {
-  final bool showCompleted;
-
-  const TasksView({super.key, required this.showCompleted});
+  const TasksView({super.key});
 
   @override
   State<TasksView> createState() => _TasksViewState();
@@ -29,12 +28,15 @@ class TasksView extends StatefulWidget {
 
 class _TasksViewState extends State<TasksView> {
   late final TasksService _tasksService;
-  late List<DatabaseTask> allTasks;
+  TasksFilter? _tasksFilter;
+  final _filter = Filter();
+  TaskSorter? _sorter;
   final _completed = ValueNotifier<int>(0);
   final _total = ValueNotifier<int>(0);
+  bool? showCompleted = false;
 
-  List<DatabaseTask> get completedTasks => allTasks.where((task) => task.isCompleted).toList();
-  List<DatabaseTask> get uncompletedTasks => allTasks.where((task) => !task.isCompleted).toList();
+  // List<DatabaseTask> get completedTasks => allTasks.where((task) => task.isCompleted).toList();
+  // List<DatabaseTask> get uncompletedTasks => allTasks.where((task) => !task.isCompleted).toList();
 
   @override
   void initState() {
@@ -45,39 +47,72 @@ class _TasksViewState extends State<TasksView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: clr.background,
       appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: clr.textPrimary,
-        ),
         leading: IconButton(
           onPressed: () {
             Scaffold.of(context).openDrawer();
           },
-          icon: Icon(Icons.menu, color: clr.textPrimary),
+          icon: Icon(Icons.menu),
         ),
-        backgroundColor: clr.background,
-        title: const Text("Tasks", style: TextStyle(color: clr.textPrimary),),
+        title: Text("Tasks", style: Theme.of(context).textTheme.bodyLarge),
         actions: [
-          widget.showCompleted ?
           IconButton(
               onPressed: () async {
-                if (await showDeleteAllDialog(context)) {
-                  _tasksService.deleteCompletedTasks();
-                  _completed.value = 0;
-                }
-              },
-              icon: const Icon(Icons.delete)
-          ) : SizedBox.square(),
+                showModalBottomSheet(
+                  context: context, 
+                  builder: (context) {
+                    return AnimatedBuilder(
+                        animation: _filter,
+                        builder: (context, child) {
+                          return Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min, // fits content
+                              children: [
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text("Filter", style: Theme.of(context).textTheme.bodyMedium),
+                                    TextButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            _tasksFilter?.reset();
+                                          });
+                                        },
+                                        child: Text("CLEAR", style: Theme.of(context).textTheme.bodyMedium)
+                                    )
+                                  ],
+                                ),
+                                CheckboxListTile(
+                                  value: _filter.showCompleted,
+                                  tristate: false,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _filter.toggleCompleted(value!);
+                                    });
+                                  },
+                                  controlAffinity: ListTileControlAffinity.leading,
+                                  enabled: true,
+                                  title: Text("Completed", style: Theme.of(context).textTheme.bodyMedium),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                    );
+                  },
+                );
+                    
+              }, 
+              icon: Icon(Icons.filter_list)
+          ),
           IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed(editTaskRoute, arguments: {null: true});
               },
-              color: clr.secondary,
               icon: const Icon(Icons.add)
           ),
           PopupMenuButton<MenuAction>(
-            iconColor: clr.secondary,
             onSelected: (value) async {
               switch (value) {
                 case MenuAction.makeTask:
@@ -119,6 +154,7 @@ class _TasksViewState extends State<TasksView> {
         ],
       ),
 
+
       body: CustomScrollView(
         slivers: [
 
@@ -134,23 +170,34 @@ class _TasksViewState extends State<TasksView> {
                   switch(snapshot.connectionState) {
                     case ConnectionState.active:
                       if (snapshot.hasData) {
-                        allTasks = snapshot.data as List<DatabaseTask>;
+                        if (_tasksFilter?.showCompleted == null) {
+                          _tasksFilter = TasksFilter(tasks: (snapshot.data as List<DatabaseTask>), filter: _filter);
+                        }
+                        _sorter ??= TaskSorter(tasks: _tasksFilter!.getFilteredTasks());
+
                         WidgetsBinding.instance.addPostFrameCallback((_){
-                          _completed.value = completedTasks.length;
-                          _total.value = allTasks.length;
+                          _completed.value = _tasksFilter!.getCompletedTasks.length;
+                          _total.value = _tasksFilter!.tasks.length;
                         });
-                        List<DatabaseTask> tasks = widget.showCompleted ? completedTasks : uncompletedTasks;
-                        return TasksListView(tasks: tasks, toggleTask: (DatabaseTask task) {
-                          _tasksService.checkOrUncheckTask(task: task);
-                        }, deleteTask: (DatabaseTask task) {
-                          _tasksService.deleteTask(id: task.id);
-                        });
+
+                        List<DatabaseTask> filteredTasks = _tasksFilter!.getFilteredTasks();
+                        filteredTasks.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+                        return TasksListView(
+                          tasks: filteredTasks,
+                          toggleTask: (DatabaseTask task) {
+                            _tasksService.checkOrUncheckTask(task: task);
+                          },
+                          deleteTask: (DatabaseTask task) {
+                            _tasksService.deleteTask(id: task.id);
+                          }
+                        );
                       } else {
                         return LoadingView();
                       }
 
                     default:
-                      return Center(child: Text("Waiting for tasks...", style: TextStyle(color: clr.textPrimary)),);
+                      return Center(child: Text("Waiting for tasks...", style: Theme.of(context).textTheme.bodyLarge),);
                   }
                 },
             ),
@@ -158,5 +205,76 @@ class _TasksViewState extends State<TasksView> {
         ],
       ),
     );
+  }
+}
+
+class TasksFilter {
+  List<DatabaseTask> tasks;
+  Filter filter;
+
+  TasksFilter({required this.tasks, required this.filter});
+
+  late bool? showCompleted = filter.showCompleted;
+
+  List<DatabaseTask> getFilteredTasks () {
+    if (showCompleted != null && showCompleted == true) {
+      return tasks.where((task) => task.isCompleted).toList();
+    }
+    else {
+      return tasks.where((task) => !task.isCompleted).toList();
+    }
+  }
+
+  // bool toggleCompleted() => showCompleted = !showCompleted;
+  // bool toggleUncompleted() => showUncompleted = !showUncompleted;
+
+  void reset() {
+    showCompleted = false;
+    // showUncompleted = true;
+  }
+
+  List<DatabaseTask> get getCompletedTasks => tasks.where((task) => task.isCompleted).toList();
+  List<DatabaseTask> get getUncompletedTasks => tasks.where((task) => !task.isCompleted).toList();
+
+}
+
+class TaskSorter {
+  List<DatabaseTask> tasks;
+
+  TaskSorter({required this.tasks});
+
+  void aByDateCreated() => tasks.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+  void zByDateCreated() => tasks.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+  void aByUpdatedAt() => tasks.sort((a, b) => a.updatedAt.compareTo(b.updatedAt));
+  void zByUpdatedAt() => tasks.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+
+  void aByIsCompleted() => tasks.sort((a, b) => a.isCompleted.compareTo(b.isCompleted));
+  void zByIsCompleted() => tasks.sort((a, b) => b.isCompleted.compareTo(a.isCompleted));
+
+  void aByName() => tasks.sort((a, b) => a.name.compareTo(b.name));
+  void zByName() => tasks.sort((a, b) => b.name.compareTo(a.name));
+
+}
+
+extension on bool {
+  int compareTo(bool other) {
+    if (this == true && other == false) return 1;
+    if (this == false && other == true) return -1;
+    return 0;
+  }
+}
+
+class Filter extends ChangeNotifier {
+  bool showCompleted = false;
+
+  void toggleCompleted(bool value) {
+    showCompleted = value;
+    notifyListeners();
+  }
+
+  void reset() {
+    showCompleted = false;
+    notifyListeners();
   }
 }

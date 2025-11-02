@@ -515,7 +515,7 @@ class DatabaseNote {
         isSynced = !((map[isSyncedColumn] as int) == 0),
         createdAt = DateTime.fromMillisecondsSinceEpoch(map['created_at'] as int),
         updatedAt = DateTime.fromMillisecondsSinceEpoch(map['updated_at'] as int),
-        isPinned = !((map[isPinnedColumn] as int) == 1);
+        isPinned = !((map[isPinnedColumn] as int) == 0);
 
   @override
   String toString() => 'Task, ID = $id, '

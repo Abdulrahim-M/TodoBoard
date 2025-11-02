@@ -15,10 +15,8 @@ TodoBoard is a mobile application built with Flutter to help you organize your t
 
 ## Screenshots
 
-| Screenshot 1 | Screenshot 2 | Screenshot 3 |
-| :----------: | :----------: | :----------: |
 |   ![Hosted Image](https://i.imgur.com/ppHO4Qt.jpeg)    |   ![Hosted Image](https://i.imgur.com/QkjdqNS.jpeg)    |   ![Hosted Image](https://i.imgur.com/hPOk78y.jpeg)    |
-
+| :----------: | :----------: | :----------: |
 
 ## Getting Started
 

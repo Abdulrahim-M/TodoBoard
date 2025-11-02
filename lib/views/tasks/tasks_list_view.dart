@@ -1,8 +1,6 @@
 
 import 'dart:developer' as dev;
 
-import 'package:todo_board/constants/palette.dart' as clr;
-
 import 'package:flutter/material.dart';
 import 'package:todo_board/services/crud/task_service.dart';
 
@@ -27,7 +25,6 @@ class TasksListView extends StatelessWidget {
                 elevation: 4,
                 margin: EdgeInsets.fromLTRB(15, 6, 15, 6),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
-                color:  clr.onPrimary,
                 child: ListTile(
                   contentPadding: EdgeInsets.fromLTRB(5, 0, 5, 0),
                   title: Text(
@@ -35,14 +32,14 @@ class TasksListView extends StatelessWidget {
                     maxLines: 1,
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle( color: clr.textPrimary),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   subtitle: Text(
                     tasks[index].note,
                     maxLines: 2,
                     softWrap: true,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle( color: clr.textSecondary),
+                    style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   leading: IconButton(
                     icon: Icon(
@@ -50,7 +47,6 @@ class TasksListView extends StatelessWidget {
                         Icons.check_box_rounded :
                         Icons.check_box_outline_blank
                     ),
-                    color: clr.textDisabled,
                     onPressed: () {
                       toggleTask(tasks[index]);
                     },
@@ -58,7 +54,6 @@ class TasksListView extends StatelessWidget {
                   trailing: !tasks[index].isCompleted ?
                   IconButton(
                     icon: Icon(Icons.edit_outlined),
-                    color: clr.textDisabled,
                     onPressed: () {
                       Navigator.of(context).pushNamed(
                           editTaskRoute,
@@ -67,7 +62,6 @@ class TasksListView extends StatelessWidget {
                     },
                   ) : IconButton(
                     icon: Icon(Icons.delete_outline),
-                    color: clr.textDisabled,
                     onPressed: () {
                       deleteTask(tasks[index]);
                     },

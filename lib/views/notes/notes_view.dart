@@ -2,15 +2,9 @@
 import 'dart:developer' as dev;
 
 import 'package:flutter/material.dart';
-import 'package:todo_board/constants/palette.dart' as clr;
 import 'package:todo_board/constants/routes.dart';
 import 'package:todo_board/services/crud/task_service.dart';
-import 'package:todo_board/utilities/dialogs/dialogs.dart';
 import 'package:todo_board/views/loading_view.dart';
-import 'package:todo_board/views/tasks/tasks_list_view.dart';
-import 'package:todo_board/widgets/usage_details.dart';
-
-import '../../services/auth/auth_service.dart';
 import 'notes_list_view.dart';
 
 enum MenuAction {
@@ -39,29 +33,22 @@ class _NotesViewState extends State<NotesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: clr.background,
       appBar: AppBar(
-        iconTheme: IconThemeData(
-          color: clr.textPrimary,
-        ),
         leading: IconButton(
           onPressed: () {
             Scaffold.of(context).openDrawer();
           },
-          icon: Icon(Icons.menu, color: clr.textPrimary),
+          icon: Icon(Icons.menu),
         ),
-        backgroundColor: clr.background,
-        title: const Text("Tasks", style: TextStyle(color: clr.textPrimary),),
+        title: Text("Notes", style: Theme.of(context).textTheme.titleLarge),
         actions: [
           IconButton(
               onPressed: () {
                 Navigator.of(context).pushNamed(editNoteRoute, arguments: null);
               },
-              color: clr.secondary,
               icon: const Icon(Icons.add)
           ),
           PopupMenuButton<MenuAction>(
-            iconColor: clr.secondary,
             onSelected: (value) async {
               switch (value) {
                 case MenuAction.makeTask:
@@ -113,6 +100,11 @@ class _NotesViewState extends State<NotesView> {
                     case ConnectionState.active:
                       if (snapshot.hasData) {
                         allNotes = snapshot.data as List<DatabaseNote>;
+
+                        allNotes.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+                        allNotes.sort((a, b) => a.isPinned.compareTo(b.isPinned));
+
+
                         return NotesListView(notes: allNotes, pinNote: (DatabaseNote note) {
                           _tasksService.pinOrUnpinNote(note: note);
                         }, deleteNote: (DatabaseNote note) {
@@ -123,7 +115,7 @@ class _NotesViewState extends State<NotesView> {
                       }
 
                     default:
-                      return Center(child: Text("Waiting for notes...", style: TextStyle(color: clr.textPrimary)),);
+                      return Center(child: Text("Waiting for notes...", style: Theme.of(context).textTheme.bodyLarge),);
                   }
                 },
             ),
@@ -133,3 +125,12 @@ class _NotesViewState extends State<NotesView> {
     );
   }
 }
+
+extension on bool {
+  int compareTo(bool other) {
+    if (this == true && other == false) return 1;
+    if (this == false && other == true) return -1;
+    return 0;
+  }
+}
+

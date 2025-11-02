@@ -1,17 +1,16 @@
 import 'package:salomon_bottom_bar/salomon_bottom_bar.dart';
 
 import 'package:flutter/material.dart';
-import 'package:todo_board/constants/palette.dart' as clr;
 
 import 'package:todo_board/services/crud/task_service.dart';
-import 'package:todo_board/views/coming_soon_view.dart';
 import 'package:todo_board/views/loading_view.dart';
 import 'package:todo_board/views/tasks/tasks_view.dart';
 
-import '../constants/routes.dart';
-import '../services/auth/auth_service.dart';
-import '../services/auth/auth_user.dart';
-import 'notes/notes_view.dart';
+import 'constants/palette3.dart';
+import 'constants/routes.dart';
+import 'main.dart';
+import 'services/auth/auth_service.dart';
+import 'views/notes/notes_view.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -23,13 +22,13 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> with WidgetsBindingObserver {
   late final AuthService _authService;
   late final TasksService _tasksService;
+  final PageController _pageController = PageController();
   late final String _email;
   late Future _tasksServiceFuture;
   int _selectedIndex = 0;
 
   final List<Widget> _pages = <Widget>[
-    TasksView(showCompleted: false,),
-    TasksView(showCompleted: true,),
+    TasksView(),
     NotesView(),
   ];
 
@@ -37,19 +36,31 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   void initState() {
     _tasksService = TasksService();
     _authService = AuthService.firebase();
-    _email = "email@mail.com";//_authService.currentUser!.email;
+
+    if (SKIP_LOGIN) {
+      _email = "email@mail.com";
+    } else {
+      _email = _authService.currentUser!.email;
+    }
+
     _tasksServiceFuture = _tasksService.open(email: _email);
     super.initState();
     WidgetsBinding.instance.addObserver(this);
   }
 
-  // Called when app resumes (e.g., from background)
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      setState(() {});
-    }
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
+
+  // Called when app resumes (e.g., from background)
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (state == AppLifecycleState.resumed) {
+  //     setState(() {});
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -59,9 +70,8 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
         switch (asyncSnapshot.connectionState) {
           case ConnectionState.done:
             return Scaffold(
-              backgroundColor: clr.background,
+
               drawer: Drawer(
-                backgroundColor: clr.onPrimary,
                 child: ListView(
                   padding: EdgeInsets.zero,
                   children: [
@@ -90,22 +100,34 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
                 ),
               ),
 
-              body: _pages[_selectedIndex],
+              body: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                setState(() => _selectedIndex = index);
+                },
+                children: _pages, // list of your pages
+              ),
 
               bottomNavigationBar: SalomonBottomBar(
                 currentIndex: _selectedIndex,
-                onTap: (i) => setState(() => _selectedIndex = i),
-                backgroundColor: clr.background,
-                items: List.generate(3, (index) {
+                onTap: (i) {
+                  setState(() => _selectedIndex = i);
+                  _pageController.jumpToPage(i);
+                },
+
+                items: List.generate(2, (index) {
+                  Color selectedColor = Theme.of(context).brightness == Brightness.dark
+                      ? RColors.primary
+                      : RColors.primary;
+
                   List<BarItem> taps = [
-                    BarItem('Tasks', Icons.list_alt, clr.primary),
-                    BarItem('Done', Icons.done_all, clr.secondary),
-                    BarItem('Notes', Icons.note_alt_outlined, clr.warning),
+                    BarItem('Tasks', Icons.list_alt),
+                    BarItem('Notes', Icons.note_alt_outlined),
                   ];
 
                   return SalomonBottomBarItem(
-                    selectedColor: taps[index].color,
-                    unselectedColor: clr.textDisabled,
+                    selectedColor: selectedColor,
+                    unselectedColor: RColors.neutral,
                     icon: Icon(taps[index].icon),
                     title: Text(taps[index].title),
                   );
@@ -123,32 +145,40 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
   DrawerHeader _buildHeader() {
     return DrawerHeader(
       decoration: BoxDecoration(
-        color: clr.textInverted,
+        color: RColors.primary[900]
       ),
       child: Column(
         children: [
           CircleAvatar(
             radius: 40,
-            backgroundColor: clr.textDisabled,
-            child: Text(
-              _authService.currentUser?.displayName?.toUpperCase() ?? '?',
-              style: TextStyle(
-                fontSize: 30,
-                color: clr.background,
-              ),
+            backgroundImage: NetworkImage(
+              _authService.currentUser?.photoUrl != null
+                ? _authService.currentUser!.photoUrl!
+                : ""
             ),
+            child: _authService.currentUser?.photoUrl!.isEmpty ?? false
+                ? Text(
+                  _authService.currentUser?.displayName?.toUpperCase() ?? '!',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ) : SizedBox(),
           ),
           SizedBox(height: 20,),
-          Text(_email, style: TextStyle(color: clr.textPrimary, fontSize: 16, fontWeight: FontWeight.bold),),
+          Text(
+            _email,
+            style: TextStyle(
+              fontSize: 20,
+              color: RColors.neutral[200]
+            )
+          ),
         ],
       ),
     );
   }
 
-  _buildItem({required String title, required IconData icon, required GestureTapCallback onTap}) {
+  ListTile _buildItem({required String title, required IconData icon, required GestureTapCallback onTap}) {
     return ListTile(
-      title: Text(title, style: TextStyle(color: clr.textPrimary),),
-      leading: Icon(icon, color: clr.textPrimary,),
+      title: Text(title, style: Theme.of(context).textTheme.bodyLarge),
+      leading: Icon(icon),
       onTap: onTap,
     );
   }
@@ -157,7 +187,6 @@ class _HomeState extends State<Home> with WidgetsBindingObserver {
 class BarItem {
   final String title;
   final IconData icon;
-  final Color color;
 
-  BarItem(this.title, this.icon, this.color);
+  BarItem(this.title, this.icon);
 }

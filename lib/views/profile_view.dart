@@ -1,9 +1,8 @@
 
 import 'package:flutter/material.dart';
+import 'package:todo_board/main.dart';
 import 'package:todo_board/services/auth/auth_service.dart';
 import 'package:todo_board/services/auth/auth_user.dart';
-
-import '../constants/palette.dart' as clr;
 
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
@@ -14,19 +13,24 @@ class ProfileView extends StatefulWidget {
 
 class _ProfileViewState extends State<ProfileView> {
   late final AuthService _authService;
+  late final _user;
 
-  AuthUser get _user => _authService.currentUser!;
+  // AuthUser get _user => _authService.currentUser!;
 
   @override
   void initState() {
     _authService = AuthService.firebase();
+    if(SKIP_LOGIN){
+      _user = AuthUser(displayName: 'Anon', photoUrl: 'https://www.shutterstock.com/image-vector/unknown-male-user-secret-identity-600nw-2055592583.jpg', phoneNumber: '+123 456 789 1011', id: "#id123", isEmailVerified: true, email: 'anonymous@localhost.com');
+    } else {
+      _user = _authService.currentUser!;
+    }
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: clr.background,
       body: LayoutBuilder(
         builder: (context, constraints) {
           if (constraints.maxWidth < 600) {
@@ -35,9 +39,7 @@ class _ProfileViewState extends State<ProfileView> {
                 SliverAppBar(
                   pinned: true,
                   expandedHeight: 200,
-                  backgroundColor: clr.background,
                   iconTheme: IconThemeData(
-                    color: clr.textPrimary,
                   ),
                   flexibleSpace: FlexibleSpaceBar(
                     background: Padding(
@@ -47,14 +49,15 @@ class _ProfileViewState extends State<ProfileView> {
                         children: [
                           CircleAvatar(
                             radius: 40,
-                            backgroundColor: clr.textDisabled,
-                            child: Text(
-                              _user.displayName?.toUpperCase() ?? '?',
-                              style: TextStyle(
-                                fontSize: 30,
-                                color: clr.background,
+                            child: _user.photoUrl.isEmpty
+                              ? Text(
+                                _user.displayName?.toUpperCase() ?? '?',
+                                style: Theme.of(context).textTheme.headlineMedium,
+                              )
+                              : CircleAvatar(
+                                radius: 40,
+                                backgroundImage: NetworkImage(_user.photoUrl),
                               ),
-                            ),
                           ),
                           SizedBox(width: 16),
                           Expanded(
@@ -66,19 +69,12 @@ class _ProfileViewState extends State<ProfileView> {
                                   _user.displayName?.isNotEmpty == true
                                       ? _user.displayName!
                                       : _user.email,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: clr.textPrimary,
-                                  ),
+                                  style: Theme.of(context).textTheme.headlineSmall,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 Text(
                                   _user.email,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: clr.textSecondary,
-                                  ),
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ],
                             ),
@@ -97,11 +93,7 @@ class _ProfileViewState extends State<ProfileView> {
                         // About Section
                         Text(
                           "About",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: clr.textPrimary,
-                          ),
+                          style: Theme.of(context).textTheme.headlineMedium,
                         ),
                         SizedBox(height: 10),
                         Card(
@@ -134,7 +126,7 @@ class _ProfileViewState extends State<ProfileView> {
           return Center(
             child: Text(
               'Desktop view coming soon!',
-              style: TextStyle(color: clr.textPrimary),
+              style: Theme.of(context).textTheme.headlineMedium,
             ),
           );
         },

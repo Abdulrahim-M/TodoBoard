@@ -5,7 +5,6 @@ import 'package:todo_board/views/Signing/verify_email_view.dart';
 import 'package:todo_board/services/auth/auth_service.dart';
 import 'package:todo_board/services/auth/auth_exceptions.dart';
 
-import '../../constants/palette.dart' as clr;
 import '../../utilities/dialogs/dialogs.dart';
 
 class LoginView extends StatefulWidget {
@@ -85,19 +84,19 @@ class _LoginViewState extends State<LoginView> {
                               password: password,
                             );
                           } on UserNotFoundAuthException catch (e) {
-                            showErrorDialog(context, "User not found", clr.error);
+                            showErrorDialog(context, "User not found", DialogLevel.error);
                             return;
                           } on WrongPasswordAuthException catch (e) {
-                            showErrorDialog(context, "Wrong password", clr.error);
+                            showErrorDialog(context, "Wrong password", DialogLevel.error);
                             return;
                           } on InvalidCredentialsAuthException catch (e) {
-                            showErrorDialog(context, "Invalid credentials", clr.error);
+                            showErrorDialog(context, "Invalid credentials", DialogLevel.error);
                             return;
                           } on GenericAuthAuthException catch (e) {
-                            showErrorDialog(context, "Authentication error while logging in", clr.error);
+                            showErrorDialog(context, "Authentication error while logging in", DialogLevel.error);
                             return;
                           } catch (e) {
-                            showErrorDialog(context, e.toString(), clr.error);
+                            showErrorDialog(context, e.toString(), DialogLevel.error);
                             return;
                           }
 
